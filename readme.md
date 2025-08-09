@@ -1,4 +1,4 @@
-this bot is under development,If you find a bug in the bot, be sure to report it on Telegram: @Apronbonny
+this bot is under development, If you find a bug in the bot, be sure to report it on Telegram: @Apronbonny
 
 warning #1 :auto detector may have some problems and may delete real members . in future it will be rewrite in pandas librery and make your work easier and better
 
