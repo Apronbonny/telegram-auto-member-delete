@@ -11,42 +11,33 @@ from telethon.tl.types import User
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
 log = logging.getLogger('anti_fake')
-
-API_ID = 123456
-API_HASH = 'your_api_hash'
+API_ID = ...
+API_HASH = ...
 SESSION_USER = 'anti_fake_user'
 SESSION_BOT = 'anti_fake_bot'
 DB_PATH = 'telethon_joins.db'
-
 @dataclass
 class JoinRecord:
     chat_id: int
     user_id: int
     username: Optional[str]
     ts: float
-
-
 async def init_db() -> None:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             'CREATE TABLE IF NOT EXISTS joins (chat_id INTEGER, user_id INTEGER, username TEXT, joined_ts REAL, PRIMARY KEY(chat_id, user_id, joined_ts))'
         )
         await db.commit()
-
-
 async def save_join_record(rec: JoinRecord) -> None:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute('INSERT OR IGNORE INTO joins(chat_id, user_id, username, joined_ts) VALUES(?,?,?,?)',
                          (rec.chat_id, rec.user_id, rec.username, rec.ts))
         await db.commit()
-
-
 async def fetch_joins(chat_id: int) -> List[JoinRecord]:
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute('SELECT chat_id, user_id, username, joined_ts FROM joins WHERE chat_id=? ORDER BY joined_ts ASC', (chat_id,)) as cur:
             rows = await cur.fetchall()
     return [JoinRecord(chat_id=r[0], user_id=r[1], username=r[2], ts=r[3]) for r in rows]
-
 
 async def scan_history_for_joins(client: TelegramClient, chat_id: str, limit: int = 2000) -> int:
     found = 0
@@ -106,7 +97,6 @@ async def scan_history_for_joins(client: TelegramClient, chat_id: str, limit: in
         log.exception('Error scanning history: %s', e)
     return found
 
-
 def detect_waves_from_timestamps(timestamps: List[float], window_seconds: int, threshold: int) -> List[Tuple[int, int, int]]:
     if not timestamps:
         return []
@@ -131,7 +121,6 @@ def detect_waves_from_timestamps(timestamps: List[float], window_seconds: int, t
             ne = max(merged[-1][1], e)
             merged[-1] = (ns, ne, ne - ns + 1)
     return merged
-
 
 async def analyze_chat_waves(chat_id: int, window_seconds: int = 30, threshold: int = 5) -> None:
     joins = await fetch_joins(chat_id)
@@ -222,3 +211,4 @@ if __name__ == '__main__':
         asyncio.run(start_interactive())
     except (KeyboardInterrupt, SystemExit):
         print('Exiting')
+
